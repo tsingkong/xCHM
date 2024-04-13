@@ -241,7 +241,10 @@ bool CHMFile::LoadCHM(const wxString& archiveName)
     LoadContextIDs();
 
 #if wxUSE_UNICODE
-    _title = translateEncoding(_title, _enc);
+    // _title = translateEncoding(_title, _enc);
+#endif
+#ifdef _DEBUG
+    printf("%s[%d]_title:%s\n", __func__, __LINE__, _title.ToStdString().c_str());
 #endif
     return true;
 }
@@ -382,7 +385,11 @@ bool CHMFile::GetItem(UCharVector& topics, UCharVector& strings, UCharVector& ur
 
     if (tree && !name.empty()) {
         auto parentIndex = level ? level - 1 : 0;
-        auto tname       = translateEncoding(CURRENT_CHAR_STRING(name.c_str()), _enc);
+        // auto tname       = translateEncoding(CURRENT_CHAR_STRING(name.c_str()), _enc);
+        wxString tname = CURRENT_CHAR_STRING(name.c_str());
+#ifdef _DEBUG
+        printf("%s[%d]tname:%s\n", __func__, __LINE__, tname.ToStdString().c_str());
+#endif
 
         parents[level] = tree->AppendItem(parents[parentIndex], tname, 2, 2, new URLTreeItem(tvalue));
 
@@ -418,8 +425,10 @@ bool CHMFile::GetTopicsTree(wxTreeCtrl& toBuild)
         return true;
 
     // Fall back to parsing the HTML TOC file, if that's in the archive
-    if (_topicsFile.IsEmpty() || !ResolveObject(_topicsFile, &ui))
+    if (_topicsFile.IsEmpty() || !ResolveObject(_topicsFile, &ui)) {
+        printf("%s[%d]_topicsFile resolve failed:%s\n", __func__, __LINE__, _topicsFile.ToStdString().c_str());
         return false;
+    }
 
     toBuild.Freeze();
 
@@ -556,8 +565,10 @@ bool CHMFile::GetIndex(CHMListCtrl& toBuild)
     if (bindex)
         return true;
 
-    if (_indexFile.IsEmpty() || !ResolveObject(_indexFile, &ui))
+    if (_indexFile.IsEmpty() || !ResolveObject(_indexFile, &ui)) {
+        printf("%s[%d]_indexFile resolve failed:%s\n", __func__, __LINE__, _indexFile.ToStdString().c_str());
         return false;
+    }
 
     toBuild.Freeze();
 
@@ -751,12 +762,18 @@ bool CHMFile::IndexSearch(const wxString& text, bool wholeWords, bool titlesOnly
 
 bool CHMFile::ResolveObject(const wxString& fileName, chmUnitInfo* ui)
 {
+#ifdef _DEBUG
+    printf("%s[%d]fileName:%s\n", __func__, __LINE__, static_cast<const char*>(fileName.mb_str()));
+#endif
     return _chmFile
         && chm_resolve_object(_chmFile, static_cast<const char*>(fileName.mb_str()), ui) == CHM_RESOLVE_SUCCESS;
 }
 
 size_t CHMFile::RetrieveObject(chmUnitInfo* ui, unsigned char* buffer, off_t fileOffset, size_t bufferSize)
 {
+#ifdef _DEBUG
+    // printf("%s[%d]ui->path:%s, offset:%ld\n", __func__, __LINE__, ui->path, fileOffset);
+#endif
     return chm_retrieve_object(_chmFile, ui, buffer, fileOffset, bufferSize);
 }
 
@@ -966,8 +983,12 @@ bool CHMFile::InfoFromWindows()
                 size   = chm_retrieve_object(_chmFile, &ui, buffer, factor * 4096, BUF_SIZE);
             }
 
-            if (size && off_hhk)
+            if (size && off_hhk) {
                 _indexFile = wxT("/") + CURRENT_CHAR_STRING(buffer + off_hhk % 4096);
+#ifdef _DEBUG
+                printf("%s[%d]_indexFile:%s\n", __func__, __LINE__, _indexFile.ToStdString().c_str());
+#endif
+            }
         }
     }
 
@@ -1010,8 +1031,12 @@ bool CHMFile::InfoFromSystem()
             index += 2;
             cursor = buffer + index;
 
-            if (_indexFile.IsEmpty())
+            if (_indexFile.IsEmpty()) {
                 _indexFile = wxT("/") + CURRENT_CHAR_STRING(buffer + index + 2);
+#ifdef _DEBUG
+                printf("%s[%d]_indexFile:%s\n", __func__, __LINE__, _indexFile.ToStdString().c_str());
+#endif
+            }
             break;
 
         case 2:
@@ -1052,8 +1077,12 @@ bool CHMFile::InfoFromSystem()
 
                 tmp = topicAttempt + wxT(".hhk");
 
-                if (chm_resolve_object(_chmFile, tmp.mb_str(), &ui) == CHM_RESOLVE_SUCCESS)
+                if (chm_resolve_object(_chmFile, tmp.mb_str(), &ui) == CHM_RESOLVE_SUCCESS) {
+#ifdef _DEBUG
+                    printf("%s[%d]tmp:%s\n", __func__, __LINE__, tmp.ToStdString().c_str());
+#endif
                     _indexFile = tmp;
+                }
             }
 
             break;

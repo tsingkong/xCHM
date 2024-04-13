@@ -92,6 +92,10 @@ private:
     bool Init(const wxString& archive);
 
 private:
+    bool _override_object;
+    std::string _object_new;
+
+private:
     static std::unique_ptr<CHMFile> _archiveCache;
     off_t                           _currPos {0};
     chmUnitInfo                     _ui {};

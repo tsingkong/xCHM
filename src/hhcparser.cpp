@@ -187,7 +187,11 @@ void HHCParser::handleTag(const std::string& tag)
                 _htmlChars = false;
             }
 
-            name = translateEncoding(name, _enc);
+            //printf("%s[%d]before translateEncoding:%s\n", __func__, __LINE__, name.ToStdString().c_str());
+            //name = translateEncoding(name, _enc);
+#ifdef _DEBUG
+            printf("%s[%d]name:%s\n", __func__, __LINE__, name.ToStdString().c_str());
+#endif
 
             addToTree(name, value);
             addToList(name, value);

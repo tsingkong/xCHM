@@ -824,6 +824,8 @@ void CHMFrame::SaveExitInfo()
     config.Write(wxT("/Fonts/fixedFontFace"), _fixedFont);
     config.Write(wxT("/Fonts/size"), _nbhtml->FontSize());
     config.Write(wxT("/Sash/leftMargin"), sashPos);
+    extern wxString g_charset;
+    config.Write(wxT("/General/charSet"), g_charset);
 
     config.SetPath(wxT("/Recent"));
     _fh.Save(config);

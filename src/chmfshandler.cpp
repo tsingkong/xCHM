@@ -78,7 +78,21 @@ wxFSFile* CHMFSHandler::OpenFile(wxFileSystem& fs, const wxString& location)
 
         auto newLocation = wxT("file:") + cache->ArchiveName() + wxT("#xchm:") + right;
 
-        return new wxFSFile(s.release(), newLocation, GetMimeTypeFromExt(right.Lower()), GetAnchor(location), {});
+        wxString mimeType = GetMimeTypeFromExt(right.Lower());
+        if (mimeType.IsSameAs("text/plain", false)) {
+            mimeType = "text/html";
+        } else if (mimeType.empty()) {
+            mimeType = "text/html";
+        }
+#ifdef _DEBUG
+        printf("%s[%d]newLocation:%s, \n\tright:%s,MIMEType:%s, \n\tlocation:%s, Anchor:%s\n", __func__, __LINE__, 
+            newLocation.ToStdString().c_str(), 
+            right.ToStdString().c_str(), 
+            mimeType.ToStdString().c_str(), 
+            location.ToStdString().c_str(),
+            GetAnchor(location).ToStdString().c_str());
+#endif
+        return new wxFSFile(s.release(), newLocation, mimeType, GetAnchor(location), {});
     }
 
     return nullptr;

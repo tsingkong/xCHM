@@ -82,6 +82,9 @@ void CHMApp::execute(XmlRpc::XmlRpcValue& params, XmlRpc::XmlRpcValue& result)
 }
 #endif
 
+// global
+wxString g_charset = "GB18030";
+
 bool CHMApp::OnInit()
 {
     auto     id = -1L;
@@ -152,7 +155,9 @@ bool CHMApp::OnInit()
         config.Read(wxT("/Fonts/fixedFontFace"), &fixedFont);
         config.Read(wxT("/Fonts/size"), &fontSize);
         config.Read(wxT("/Sash/leftMargin"), &sashPos);
+        config.Read(wxT("/General/charSet"), &g_charset, g_charset);
     }
+    printf("%s[%d]g_charset:%s\n", __func__, __LINE__, g_charset.ToStdString().c_str());
 
     wxString fullAppPath;
 

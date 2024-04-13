@@ -26,7 +26,17 @@
 #include <wx/string.h>
 
 #if wxUSE_UNICODE
-#define CURRENT_CHAR_STRING(x) wxString(reinterpret_cast<const char*>(x), wxConvISO8859_1)
+// #define CURRENT_CHAR_STRING(x) wxString(reinterpret_cast<const char*>(x), wxConvISO8859_1)
+#include <wx/convauto.h>
+extern wxString g_charset;
+template <typename T>
+wxString CURRENT_CHAR_STRING(T x) {
+    wxString str(reinterpret_cast<const char*>(x), wxCSConv(g_charset));
+#ifdef _DEBUG
+    // printf("%s[%d]str:%s\n", __func__, __LINE__, str.ToStdString().c_str());
+#endif
+    return str;
+};
 #define CURRENT_CHAR_STRING_CV(x, cv) wxString(reinterpret_cast<const char*>(x), cv)
 #else
 #define CURRENT_CHAR_STRING(x) wxString(reinterpret_cast<const char*>(x))
@@ -50,6 +60,7 @@ inline std::unique_ptr<wxCSConv> createCSConvPtr(wxFontEncoding enc)
 }
 
 #if wxUSE_UNICODE
+/*
 inline wxString translateEncoding(const wxString& input, wxFontEncoding enc)
 {
     if (!input.IsEmpty() && enc != wxFONTENCODING_SYSTEM) {
@@ -61,6 +72,7 @@ inline wxString translateEncoding(const wxString& input, wxFontEncoding enc)
 
     return input;
 }
+*/
 #else
 #define translateEncoding(x, y) x
 #endif
