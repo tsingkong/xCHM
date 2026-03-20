@@ -447,3 +447,6 @@
 
 	* 1.39:
 		+ added Georgian translation.
+		+ fixed an HHC parser bug.
+		+ replaced a few obsolete wxWidgets constructs.
+		+ added more basic safety checks in CHM raw buffer parsing.
