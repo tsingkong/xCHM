@@ -308,6 +308,12 @@ void HHCParser::addToTree(const wxString& name, const wxString& value)
     if (!name.IsEmpty()) {
         auto parentIndex = _level ? _level - 1 : 0;
 
+        while (parentIndex > 0 && !_parents[parentIndex].IsOk())
+            --parentIndex;
+
+        if (!_parents[parentIndex].IsOk())
+            _parents[parentIndex] = _tree->GetRootItem();
+
         _parents[_level] = _tree->AppendItem(_parents[parentIndex], name, 2, 2, new URLTreeItem(value));
 
         if (!_level)
