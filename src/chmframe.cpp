@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2003 - 2024  Razvan Cojocaru <rzvncj@gmail.com>
+  Copyright (C) 2003 - 2026  Razvan Cojocaru <razvanc@mailbox.org>
    XML-RPC/Context ID code contributed by Eamon Millman / PCI Geomatics
   <millman@pcigeomatics.com>
   Tree control icons code (and the icons) contributed by Fritz Elfert
@@ -70,7 +70,7 @@ namespace {
 const wxChar* greeting = wxT(
     "<html><head><title>About</title></head><body><table border=0><tr><td align=\"left\">"
     "<img src=\"memory:logo.xpm\"></td><td align=\"left\">Hello, and welcome to <B>xCHM</B>, the UNIX CHM viewer."
-    "<br><br><B>xCHM</B> has been written by Razvan Cojocaru (rzvncj@gmail.com). It is licensed under the "
+    "<br><br><B>xCHM</B> has been written by Ra&#774;zvan Cojocaru. It is licensed under the "
     "<TT>GPL</TT>.<br>It's based on Jed Wing's <a href=\"http://www.jedrea.com/chmlib/\">CHMLIB</a> and "
     "<a href=\"http://www.wxwidgets.org\">wxWidgets</a>.<br><br></td></tr></table>"
     "<br>If you'd like to know more about CHM, go to <a href=\"http://www.nongnu.org/chmspec/latest/\">Pabs' CHM"
@@ -93,7 +93,7 @@ const wxChar* greeting = wxT(
 const wxChar* error_page = wxT("<html><body>Error loading CHM file!</body></html>");
 
 const wxChar* about_txt = wxT("xCHM v. " VERSION
-                              "\nby Razvan Cojocaru <rzvncj@gmail.com>\n\n"
+                              "\nby Razvan Cojocaru <razvanc@mailbox.org>\n\n"
                               "With thanks to Pabs. Based on Jed Wing's CHMLIB.\n"
                               "XMLRPC code for context sensitive help contributed by Eamon Millman. "
                               "<SPAN> tag support and contents tree icons contributed by Fritz Elfert. "
@@ -168,6 +168,34 @@ CHMFrame::CHMFrame(const wxString& title, const wxString& booksDir, const wxPoin
 
     _sw->Initialize(_nbhtml);
     _nbhtml->GetCurrentPage()->SetFocusFromKbd();
+
+    // Event bindings
+    Bind(wxEVT_MENU, &CHMFrame::OnQuit, this, ID_Quit);
+    Bind(wxEVT_MENU, &CHMFrame::OnAbout, this, ID_About);
+    Bind(wxEVT_MENU, &CHMFrame::OnOpen, this, ID_Open);
+    Bind(wxEVT_MENU, &CHMFrame::OnChangeFonts, this, ID_Fonts);
+    Bind(wxEVT_MENU, &CHMFrame::OnHome, this, ID_Home);
+    Bind(wxEVT_MENU, &CHMFrame::OnHistoryForward, this, ID_Forward);
+    Bind(wxEVT_MENU, &CHMFrame::OnHistoryBack, this, ID_Back);
+    Bind(wxEVT_MENU, &CHMFrame::OnShowContents, this, ID_Contents);
+#if defined(__WXMSW__) || defined(__WXMAC__)
+    Bind(wxEVT_MENU, &CHMFrame::OnRegisterExtension, this, ID_RegisterExtension);
+#endif
+    Bind(wxEVT_MENU, &CHMFrame::OnPrint, this, ID_Print);
+    Bind(wxEVT_MENU, &CHMFrame::OnHistFile, this, wxID_FILE1, wxID_FILE9);
+    Bind(wxEVT_MENU, &CHMFrame::OnFind, this, ID_FindInPage);
+    Bind(wxEVT_MENU, &CHMFrame::OnCloseTab, this, ID_CloseTab);
+    Bind(wxEVT_MENU, &CHMFrame::OnNewTab, this, ID_NewTab);
+    Bind(wxEVT_MENU, &CHMFrame::OnCopySelection, this, ID_CopySelection);
+    Bind(wxEVT_MENU, &CHMFrame::OnToggleFullScreen, this, ID_FullScreen);
+    Bind(wxEVT_MENU, &CHMFrame::OnToggleToolbar, this, ID_ToggleToolbar);
+    Bind(wxEVT_BUTTON, &CHMFrame::OnAddBookmark, this, ID_Add);
+    Bind(wxEVT_BUTTON, &CHMFrame::OnRemoveBookmark, this, ID_Remove);
+    Bind(wxEVT_TREE_SEL_CHANGED, &CHMFrame::OnSelectionChanged, this, ID_TreeCtrl);
+    Bind(wxEVT_COMBOBOX, &CHMFrame::OnBookmarkSel, this, ID_Bookmarks);
+    Bind(wxEVT_TEXT_ENTER, &CHMFrame::OnBookmarkSel, this, ID_Bookmarks);
+    Bind(wxEVT_CLOSE_WINDOW, &CHMFrame::OnCloseWindow, this);
+    Bind(wxEVT_CHAR, &CHMFrame::OnChar, this);
 }
 
 CHMFrame::~CHMFrame()
@@ -911,32 +939,3 @@ FontSizesArray CHMFrame::ComputeFontSizes(int size) const
 
     return sizes;
 }
-
-BEGIN_EVENT_TABLE(CHMFrame, wxFrame)
-EVT_MENU(ID_Quit, CHMFrame::OnQuit)
-EVT_MENU(ID_About, CHMFrame::OnAbout)
-EVT_MENU(ID_Open, CHMFrame::OnOpen)
-EVT_MENU(ID_Fonts, CHMFrame::OnChangeFonts)
-EVT_MENU(ID_Home, CHMFrame::OnHome)
-EVT_MENU(ID_Forward, CHMFrame::OnHistoryForward)
-EVT_MENU(ID_Back, CHMFrame::OnHistoryBack)
-EVT_MENU(ID_Contents, CHMFrame::OnShowContents)
-#if defined(__WXMSW__) || defined(__WXMAC__)
-EVT_MENU(ID_RegisterExtension, CHMFrame::OnRegisterExtension)
-#endif
-EVT_MENU(ID_Print, CHMFrame::OnPrint)
-EVT_MENU_RANGE(wxID_FILE1, wxID_FILE9, CHMFrame::OnHistFile)
-EVT_MENU(ID_FindInPage, CHMFrame::OnFind)
-EVT_MENU(ID_CloseTab, CHMFrame::OnCloseTab)
-EVT_MENU(ID_NewTab, CHMFrame::OnNewTab)
-EVT_MENU(ID_CopySelection, CHMFrame::OnCopySelection)
-EVT_MENU(ID_FullScreen, CHMFrame::OnToggleFullScreen)
-EVT_MENU(ID_ToggleToolbar, CHMFrame::OnToggleToolbar)
-EVT_BUTTON(ID_Add, CHMFrame::OnAddBookmark)
-EVT_BUTTON(ID_Remove, CHMFrame::OnRemoveBookmark)
-EVT_TREE_SEL_CHANGED(ID_TreeCtrl, CHMFrame::OnSelectionChanged)
-EVT_COMBOBOX(ID_Bookmarks, CHMFrame::OnBookmarkSel)
-EVT_TEXT_ENTER(ID_Bookmarks, CHMFrame::OnBookmarkSel)
-EVT_CLOSE(CHMFrame::OnCloseWindow)
-EVT_CHAR(CHMFrame::OnChar)
-END_EVENT_TABLE()

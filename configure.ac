@@ -1,4 +1,4 @@
-AC_INIT([xchm],[1.38])
+AC_INIT([xchm],[1.40])
 AC_CONFIG_SRCDIR(src/chmfile.cpp)
 AC_CONFIG_HEADERS(config.h)
 
@@ -34,7 +34,7 @@ wx_config_minor_version=`echo $WX_VERSION | \
 	sed 's/\([[0-9]]*\).\([[0-9]]*\).\([[0-9]]*\)/\2/'`
 
 CPPFLAGS="$CPPFLAGS $WX_CPPFLAGS"
-CXXFLAGS="$CXXFLAGS $WX_CXXFLAGS_ONLY -std=c++14 -W -Wall -Wno-ignored-qualifiers -Wno-cast-function-type"
+CXXFLAGS="$CXXFLAGS $WX_CXXFLAGS_ONLY -std=c++17 -W -Wall -Wno-ignored-qualifiers -Wno-cast-function-type"
 CFLAGS="$CFLAGS $WX_CFLAGS_ONLY"
 XMLRPCDIR=""
      

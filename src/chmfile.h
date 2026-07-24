@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2003 - 2024  Razvan Cojocaru <rzvncj@gmail.com>
+  Copyright (C) 2003 - 2026  Razvan Cojocaru <razvanc@mailbox.org>
 
   This program is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -24,17 +24,17 @@
 #include <config.h>
 #endif
 
-#include <stdint.h>
+#include <cstdint>
 #ifdef ENABLE_BUILTIN_CHMLIB
 #include "xchm_chm_lib.h"
 #else
 #include <chm_lib.h>
 #endif
 #include <string>
+#include <unordered_map>
 #include <vector>
 #include <wx/filefn.h>
 #include <wx/font.h>
-#include <wx/hashmap.h>
 #include <wx/string.h>
 
 // Forward declarations.
@@ -44,13 +44,31 @@ class wxCSConv;
 
 using UCharVector = std::vector<unsigned char>;
 
-//! Declares a class called CHMSearchResults - <string, string> hashmap.
-WX_DECLARE_STRING_HASH_MAP(wxString, CHMSearchResults);
-//! Declares a class called CHMIDMap - <int, string> hashmap.
-WX_DECLARE_HASH_MAP(int, wxString, wxIntegerHash, wxIntegerEqual, CHMIDMap);
+//! <string, string> hashmap for search results.
+using CHMSearchResults = std::unordered_map<wxString, wxString>;
+//! <int, string> hashmap for context ID mapping.
+using CHMIDMap = std::unordered_map<int, wxString>;
 
 //! C++ wrapper around CHMLIB. Concrete class.
 class CHMFile {
+    //! Helper. To avoid a large list of parameters in 'ProcessWLC', and slightly improve readability
+    struct IndexSearchUnitsInfo {
+        chmFile*    fileMain;
+        chmUnitInfo uiMain {};
+
+        chmFile*    fileTopics;
+        chmUnitInfo uiTopics {};
+
+        chmFile*    fileStrings;
+        chmUnitInfo uiStrings {};
+
+        chmFile*    fileUrltbl;
+        chmUnitInfo uiUrltbl {};
+
+        chmFile*    fileUrlstr;
+        chmUnitInfo uiUrlstr {};
+    };
+
 public:
     //! Default constructor.
     CHMFile() = default;
@@ -203,12 +221,11 @@ private:
 
     //! Helper. Returns the $FIftiMain offset of leaf node or 0.
     uint32_t GetLeafNodeOffset(const wxString& text, uint32_t initalOffset, uint32_t buffSize, uint16_t treeDepth,
-                               chmUnitInfo* ui);
+                               chmFile* file, chmUnitInfo* ui);
 
     //! Helper. Processes the word location code entries while searching.
     bool ProcessWLC(uint64_t wlc_count, uint64_t wlc_size, uint32_t wlc_offset, unsigned char ds, unsigned char dr,
-                    unsigned char cs, unsigned char cr, unsigned char ls, unsigned char lr, chmUnitInfo* uifmain,
-                    chmUnitInfo* uitbl, chmUnitInfo* uistrings, chmUnitInfo* topics, chmUnitInfo* urlstr,
+                    unsigned char cs, unsigned char cr, unsigned char ls, unsigned char lr, IndexSearchUnitsInfo& uis,
                     CHMSearchResults& results);
 
     //! Looks up as much information as possible from #WINDOWS/#STRINGS.
@@ -233,6 +250,7 @@ private:
 
 private:
     chmFile*       _chmFile {nullptr};
+    chmFile*       _chmChiFile {nullptr};
     wxString       _filename;
     wxString       _home {wxT("/")};
     wxString       _topicsFile;

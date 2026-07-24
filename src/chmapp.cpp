@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2003 - 2024  Razvan Cojocaru <rzvncj@gmail.com>
+  Copyright (C) 2003 - 2026  Razvan Cojocaru <razvanc@mailbox.org>
   XML-RPC/Context ID code contributed by Eamon Millman / PCI Geomatics
   <millman@pcigeomatics.com>
   Mac OS patches contributed by Mojca Miklavec <mojca@macports.org>
@@ -57,7 +57,7 @@ void CHMApp::execute(XmlRpc::XmlRpcValue& params, XmlRpc::XmlRpcValue& result)
     result = false;
 
     if (params.size() > 0 && params[0].getType() == XmlRpcValue::TypeInt)
-        switch (int(params[0])) {
+        switch (static_cast<int>(params[0])) {
 
         case 0: // we want to shut everything down!
             ExitMainLoop();
@@ -71,12 +71,12 @@ void CHMApp::execute(XmlRpc::XmlRpcValue& params, XmlRpc::XmlRpcValue& result)
             if (params.size() == 3 && params[1].getType() == XmlRpcValue::TypeString
                 && params[2].getType() == XmlRpcValue::TypeInt)
                 result = _frame->LoadCHM(CURRENT_CHAR_STRING(std::string(params[1]).c_str()))
-                    && _frame->LoadContextID(int(params[2]));
+                    && _frame->LoadContextID(static_cast<int>(params[2]));
             break;
 
         case 2:
             if (params.size() == 2 && params[1].getType() == XmlRpcValue::TypeInt)
-                result = _frame->LoadContextID(int(params[1]));
+                result = _frame->LoadContextID(static_cast<int>(params[1]));
             break;
         }
 }
@@ -175,6 +175,7 @@ bool CHMApp::OnInit()
     if (port != -1L) {
         _timer.SetOwner(this, TIMER_ID);
         _timer.Start(100);
+        Bind(wxEVT_TIMER, &CHMApp::WatchForXMLRPC, this, TIMER_ID);
         getXmlRpcServer().bindAndListen(port);
     }
 #endif
@@ -231,11 +232,5 @@ void CHMApp::WatchForXMLRPC(wxTimerEvent&)
 }
 #endif
 
-#ifdef WITH_LIBXMLRPC
-BEGIN_EVENT_TABLE(CHMApp, wxApp)
-EVT_TIMER(TIMER_ID, CHMApp::WatchForXMLRPC)
-END_EVENT_TABLE()
-#endif
-
 // Apparently this macro gets main() pumping.
-IMPLEMENT_APP(CHMApp)
+wxIMPLEMENT_APP(CHMApp);

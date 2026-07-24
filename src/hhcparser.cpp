@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2003 - 2024  Razvan Cojocaru <rzvncj@gmail.com>
+  Copyright (C) 2003 - 2026  Razvan Cojocaru <razvanc@mailbox.org>
 
   This program is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -17,11 +17,11 @@
   MA 02110-1301, USA.
 */
 
+#include <cctype>
 #include <chmlistctrl.h>
-#include <ctype.h>
+#include <cstdlib>
 #include <hhcparser.h>
 #include <map>
-#include <stdlib.h>
 #include <wx/wx.h>
 #include <wxstringutils.h>
 
@@ -210,9 +210,10 @@ void HHCParser::handleTag(const std::string& tag)
         }
 
     } else {
-        if (tagName == "ul")
-            ++_level;
-        else if (tagName == "/ul") {
+        if (tagName == "ul") {
+            if (_level + 1 < static_cast<int>(TREE_BUF_SIZE))
+                ++_level;
+        } else if (tagName == "/ul") {
             if (_level > 0)
                 --_level;
         } else if (tagName == "object") {
@@ -311,6 +312,12 @@ void HHCParser::addToTree(const wxString& name, const wxString& value)
     if (!name.IsEmpty()) {
         auto parentIndex = _level ? _level - 1 : 0;
 
+        while (parentIndex > 0 && !_parents[parentIndex].IsOk())
+            --parentIndex;
+
+        if (!_parents[parentIndex].IsOk())
+            _parents[parentIndex] = _tree->GetRootItem();
+
         _parents[_level] = _tree->AppendItem(_parents[parentIndex], name, 2, 2, new URLTreeItem(value));
 
         if (!_level)
@@ -345,7 +352,7 @@ wxString HHCParser::replaceHTMLChars(const wxString& input)
     wxString special;
 
     for (size_t i = 0; i < input.Length(); ++i) {
-        switch (wxChar(input[i])) {
+        switch (static_cast<wxChar>(input[i])) {
         case wxT('&'):
             inSpecial = true;
             special   = wxEmptyString;

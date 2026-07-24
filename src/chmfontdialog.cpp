@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2003 - 2024  Razvan Cojocaru <rzvncj@gmail.com>
+  Copyright (C) 2003 - 2026  Razvan Cojocaru <razvanc@mailbox.org>
 
   This program is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -94,6 +94,8 @@ CHMFontDialog::CHMFontDialog(wxWindow* parent, const wxString& normalFont, const
     topsizer->Fit(this);
     Centre(wxBOTH);
 
+    Bind(wxEVT_FONTPICKER_CHANGED, &CHMFontDialog::OnUpdate, this);
+
     UpdatePreview();
 }
 
@@ -121,7 +123,3 @@ void CHMFontDialog::OnUpdate(wxFontPickerEvent& event)
 
     UpdatePreview();
 }
-
-BEGIN_EVENT_TABLE(CHMFontDialog, wxDialog)
-EVT_FONTPICKER_CHANGED(wxID_ANY, CHMFontDialog::OnUpdate)
-END_EVENT_TABLE()

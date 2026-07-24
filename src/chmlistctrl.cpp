@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2003 - 2024  Razvan Cojocaru <rzvncj@gmail.com>
+  Copyright (C) 2003 - 2026  Razvan Cojocaru <razvanc@mailbox.org>
   ListDirty() patch contributed by Iulian Dragos
   <dragosiulian@users.sourceforge.net>
 
@@ -24,49 +24,50 @@
 #include <chmlistctrl.h>
 #include <wx/settings.h>
 
-// Helper
+namespace {
 
-int CompareItemPairs(CHMListPairItem* item1, CHMListPairItem* item2)
+//! Comparator for sorted insertion: case-insensitive by title.
+bool ItemLessThan(const std::unique_ptr<CHMListPairItem>& a, const std::unique_ptr<CHMListPairItem>& b)
 {
-    return (item1->_title).CmpNoCase(item2->_title);
+    return a->_title.CmpNoCase(b->_title) < 0;
 }
+
+} // namespace
 
 // CHMListCtrl implementation
 
 CHMListCtrl::CHMListCtrl(wxWindow* parent, CHMHtmlNotebook* nbhtml, wxWindowID id)
     : wxListCtrl(parent, id, wxDefaultPosition, wxDefaultSize,
                  wxLC_VIRTUAL | wxLC_REPORT | wxLC_NO_HEADER | wxLC_SINGLE_SEL | wxLC_SORT_ASCENDING | wxSUNKEN_BORDER),
-      _items(CompareItemPairs), _nbhtml(nbhtml)
+      _nbhtml(nbhtml)
 {
     constexpr size_t INDEX_HINT_SIZE {2048};
 
     InsertColumn(0, wxEmptyString);
     SetItemCount(0);
 
-    _items.Alloc(INDEX_HINT_SIZE);
-}
+    _items.reserve(INDEX_HINT_SIZE);
 
-CHMListCtrl::~CHMListCtrl()
-{
-    // Clean the items up.
-    ResetItems();
+    Bind(wxEVT_SIZE, &CHMListCtrl::OnSize, this);
 }
 
 void CHMListCtrl::Reset()
 {
-    ResetItems();
+    _items.clear();
     DeleteAllItems();
     UpdateUI();
 }
 
 void CHMListCtrl::UpdateItemCount()
 {
-    SetItemCount(_items.GetCount());
+    SetItemCount(_items.size());
 }
 
 void CHMListCtrl::AddPairItem(const wxString& title, const wxString& url)
 {
-    _items.Add(new CHMListPairItem(title, url));
+    auto item = std::make_unique<CHMListPairItem>(title, url);
+    auto pos  = std::lower_bound(_items.begin(), _items.end(), item, ItemLessThan);
+    _items.insert(pos, std::move(item));
 }
 
 void CHMListCtrl::LoadSelected()
@@ -74,7 +75,7 @@ void CHMListCtrl::LoadSelected()
     auto item = -1L;
     item      = GetNextItem(item, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
 
-    if (item == -1L || item > static_cast<long>(_items.GetCount()) - 1)
+    if (item == -1L || item >= static_cast<long>(_items.size()))
         return;
 
     auto chmf = CHMInputStream::GetCache();
@@ -108,14 +109,6 @@ void CHMListCtrl::FindBestMatch(const wxString& title)
     wxWindow::Update();
 }
 
-void CHMListCtrl::ResetItems()
-{
-    for (auto i = 0UL; i < _items.GetCount(); ++i)
-        delete _items[i];
-
-    _items.Empty();
-}
-
 void CHMListCtrl::OnSize(wxSizeEvent& event)
 {
     UpdateUI();
@@ -125,12 +118,8 @@ void CHMListCtrl::OnSize(wxSizeEvent& event)
 wxString CHMListCtrl::OnGetItemText(long item, long column) const
 {
     // Is this even possible? item == -1 or item > size - 1?
-    if (column != 0 || item == -1L || item > static_cast<long>(_items.GetCount()) - 1)
+    if (column != 0 || item == -1L || item >= static_cast<long>(_items.size()))
         return wxT("");
 
     return _items[item]->_title;
 }
-
-BEGIN_EVENT_TABLE(CHMListCtrl, wxListCtrl)
-EVT_SIZE(CHMListCtrl::OnSize)
-END_EVENT_TABLE()

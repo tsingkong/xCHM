@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2003 - 2024  Razvan Cojocaru <rzvncj@gmail.com>
+  Copyright (C) 2003 - 2026  Razvan Cojocaru <razvanc@mailbox.org>
   Tabbed browsing support developed by Cedric Boudinet <bouced@gmx.fr>
   (this file originally written by Cedric Boudinet)
 
@@ -97,7 +97,6 @@ private:
     wxString    _fontsNormalFace;
     wxString    _fontsFixedFace;
     int         _fontSize;
-    DECLARE_EVENT_TABLE()
 };
 
 #endif // __CHMHTMLNOTEBOOK_H_

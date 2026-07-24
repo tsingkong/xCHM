@@ -442,3 +442,14 @@
 	* 1.38:
 		+ added drag-and-drop support.
 		+ performance improvements.
+		+ added support for external .chi index files.
+		+ bumped minimum required compiler standard support to C++17.
+
+	* 1.39:
+		+ added Georgian translation.
+		+ fixed an HHC parser bug.
+		+ replaced a few obsolete wxWidgets constructs.
+		+ added more basic safety checks in CHM raw buffer parsing.
+
+	* 1.40:
+		+ updated Polish translation.

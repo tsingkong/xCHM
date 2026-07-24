@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2003 - 2024  Razvan Cojocaru <rzvncj@gmail.com>
+  Copyright (C) 2003 - 2026  Razvan Cojocaru <razvanc@mailbox.org>
 
   This program is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -154,9 +154,6 @@ private:
     CHMFrame*                      _frame;
     wxString                       _link;
     std::unique_ptr<CHMFindDialog> _fdlg;
-
-private:
-    DECLARE_EVENT_TABLE()
 };
 
 #endif // __CHMHTMLWINDOW_H_
